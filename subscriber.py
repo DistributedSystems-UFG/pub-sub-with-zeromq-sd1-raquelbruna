@@ -2,11 +2,20 @@ import zmq
 from constPS import * #-
 
 context = zmq.Context()
-s = context.socket(zmq.SUB)          # create a subscriber socket
-p = "tcp://"+ HOST +":"+ PORT        # how and where to communicate
-s.connect(p)                         # connect to the server
-s.setsockopt_string(zmq.SUBSCRIBE, "TIME")  # subscribe to TIME messages
+socket = context.socket(zmq.SUB)  # Cria um socket de assinatura
 
-for i in range(5):  # Five iterations
-	time = s.recv()   # receive a message
-	print (bytes.decode(time))
+def subscribe(topic):
+    socket.setsockopt_string(zmq.SUBSCRIBE, topic)
+
+# Conecta ao servidor
+socket.connect("tcp://localhost:5555")
+
+# Exemplos de assinatura de tópicos
+subscribe("user123")  # Assina as mensagens direcionadas ao usuário 123
+subscribe("topic1")  # Assina as mensagens do tópico 1
+
+# Recebe e imprime as mensagens por um determinado número de iterações
+for i in range(5):
+    topic, message = socket.recv_multipart()
+    print(f"Tópico: {topic.decode('utf-8')}\nMensagem: {message.decode('utf-8')}\n")
+
